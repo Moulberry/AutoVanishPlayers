@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "com.moulberry.autovanishplayers.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "MixinLivingEntityRenderer"
+  ]
+}
