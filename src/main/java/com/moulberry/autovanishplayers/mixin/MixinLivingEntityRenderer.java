@@ -25,6 +25,7 @@ public abstract class MixinLivingEntityRenderer extends EntityRenderer<LivingEnt
 
     @Unique
     private boolean forceInvisibleRenderType = false;
+    @Unique
     private int invisibleAlpha = 0xFF;
 
     protected MixinLivingEntityRenderer(EntityRendererProvider.Context context) {
@@ -53,15 +54,17 @@ public abstract class MixinLivingEntityRenderer extends EntityRenderer<LivingEnt
         at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/EntityModel;renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V"), index = 4)
     public int render_renderToBuffer(int argb) {
         if (forceInvisibleRenderType) {
+            int oldAlpha = (argb >> 24) & 0xFF;
+            int newAlpha = Math.min(oldAlpha, invisibleAlpha);
             argb &= 0xFFFFFF;
-            argb |= invisibleAlpha << 24;
+            argb |= newAlpha << 24;
         }
         return argb;
     }
 
     @Inject(method = "getRenderType", at = @At("HEAD"), cancellable = true)
-    public void getRenderType(LivingEntity livingEntity, boolean bl, boolean bl2, boolean bl3, CallbackInfoReturnable<RenderType> cir) {
-        if (forceInvisibleRenderType) {
+    public void getRenderType(LivingEntity livingEntity, boolean visible, boolean translucent, boolean glowing, CallbackInfoReturnable<RenderType> cir) {
+        if (visible && forceInvisibleRenderType) {
             cir.setReturnValue(RenderType.itemEntityTranslucentCull(this.getTextureLocation(livingEntity)));
         }
     }
